@@ -1,17 +1,5 @@
-// Root build.gradle
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath "com.android.tools.build:gradle:8.1.1"
-    }
+// Top-level build file
+plugins {
+    id 'com.android.application' version '8.2.0' apply false
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}

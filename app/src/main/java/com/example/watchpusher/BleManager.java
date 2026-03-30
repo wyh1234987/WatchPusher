@@ -13,13 +13,15 @@ import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
+import java.util.Set;
 import java.util.UUID;
 
 public class BleManager {
     private static final String TAG = "BleManager";
-    // 🔍 模糊匹配名字：只要包含这个词且不区分大小写
-    private static final String TARGET_NAME_KEY = "WATCH"; 
-    
+    // 🎯 目标名字和地址 (从您的截图获取)
+    private static final String TARGET_NAME = "HH-D101_Watch";
+    private static final String TARGET_MAC  = "63:38:AD:CE:38:63"; 
+
     private static final UUID SERVICE_UUID = UUID.fromString("0000fe01-0000-1000-8000-00805f9b34fb");
     private static final UUID CHAR_UUID    = UUID.fromString("0000fe02-0000-1000-8000-00805f9b34fb");
 
@@ -34,6 +36,19 @@ public class BleManager {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter == null || !adapter.isEnabled()) return;
 
+        // 1️⃣ 第一步：先检查“已配对设备” (解决截图中 BONDED 的问题)
+        Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
+        if (pairedDevices != null) {
+            for (BluetoothDevice device : pairedDevices) {
+                if (TARGET_NAME.equals(device.getName()) || TARGET_MAC.equals(device.getAddress())) {
+                    MainActivity.getInstance().updateStatus("STATUS: FOUND PAIRED", Color.BLUE);
+                    connectToDevice(device);
+                    return; // 找到了直接连，结束方法
+                }
+            }
+        }
+
+        // 2️⃣ 第二步：如果通讯录里没有，再开始扫描
         final BluetoothLeScanner scanner = adapter.getBluetoothLeScanner();
         if (scanner == null) return;
 
@@ -41,21 +56,21 @@ public class BleManager {
             @Override
             public void onScanResult(int callbackType, ScanResult result) {
                 BluetoothDevice device = result.getDevice();
-                String name = device.getName();
-                
-                // 🔔 调试：如果我们搜到了任何有名字的设备，但在 SCANNING
-                if (name != null) {
-                    Log.d(TAG, "Found device: " + name);
-                    
-                    // 核心逻辑：名字里包含 "WATCH" (不分大小写) 就尝试连接
-                    if (name.toUpperCase().contains(TARGET_NAME_KEY)) {
-                        MainActivity.getInstance().updateStatus("FOUND: " + name, Color.BLUE);
-                        scanner.stopScan(this);
-                        mGatt = device.connectGatt(mContext, false, mGattCallback);
-                    }
+                String name = (result.getScanRecord() != null) ? result.getScanRecord().getDeviceName() : device.getName();
+                String mac = device.getAddress();
+
+                if (TARGET_NAME.equals(name) || TARGET_MAC.equals(mac)) {
+                    MainActivity.getInstance().updateStatus("FOUND: " + name, Color.parseColor("#0000AA"));
+                    scanner.stopScan(this);
+                    connectToDevice(device);
                 }
             }
         });
+    }
+
+    private void connectToDevice(BluetoothDevice device) {
+        // 使用 TRANSPORT_LE 强制使用低功耗模式连接，更稳定
+        mGatt = device.connectGatt(mContext, false, mGattCallback, BluetoothDevice.TRANSPORT_LE);
     }
 
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {

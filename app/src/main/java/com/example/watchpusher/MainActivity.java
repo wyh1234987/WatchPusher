@@ -3,17 +3,19 @@ package com.example.watchpusher;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 public class MainActivity extends AppCompatActivity {
     private static MainActivity instance;
     private BleManager mBleManager;
+    private TextView tvStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,22 +23,27 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         instance = this;
         mBleManager = new BleManager(this);
+        tvStatus = findViewById(R.id.tv_status);
 
-        // 按钮 1：授权通知
-        Button btnSettings = findViewById(R.id.btn_settings);
-        btnSettings.setOnClickListener(v -> {
+        findViewById(R.id.btn_settings).setOnClickListener(v -> {
             startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
         });
 
-        // 按钮 2：连接蓝牙 (增加权限检查)
-        Button btnConnect = findViewById(R.id.btn_connect);
-        btnConnect.setOnClickListener(v -> {
+        findViewById(R.id.btn_connect).setOnClickListener(v -> {
             if (checkBlePermissions()) {
                 mBleManager.startScanAndConnect();
-                Toast.makeText(this, "Scanning for Watch...", Toast.LENGTH_SHORT).show();
+                updateStatus("STATUS: SCANNING...", Color.BLUE);
             } else {
                 requestBlePermissions();
             }
+        });
+    }
+
+    // 🚀 供后台调用的显示更新方法
+    public void updateStatus(final String text, final int color) {
+        runOnUiThread(() -> {
+            tvStatus.setText(text);
+            tvStatus.setTextColor(color);
         });
     }
 

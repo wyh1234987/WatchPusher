@@ -1,0 +1,13 @@
+<!-- res/values/strings.xml -->
+<resources>
+    <string name="app_name">WatchPusher</string>
+</resources>
+
+<!-- res/values/themes.xml -->
+<resources>
+    <style name="Theme.WatchPusher" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">#07E0</item> <!-- WeChat Green -->
+        <item name="colorPrimaryDark">#05C0</item>
+        <item name="colorAccent">#FF4081</item>
+    </style>
+</resources>

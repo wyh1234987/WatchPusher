@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.watchpusher">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- BLE Permissions -->
+    <!-- 蓝牙权限 -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
@@ -11,9 +10,8 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
         android:label="WatchPusher"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        android:theme="@style/Theme.WatchPusher"> <!-- 使用我们刚才定义的绿颜色主题 -->
 
         <activity
             android:name=".MainActivity"
@@ -24,7 +22,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Notification Listener Service: THE CORE -->
         <service
             android:name=".NotificationMonitorService"
             android:label="Watch Notification Service"

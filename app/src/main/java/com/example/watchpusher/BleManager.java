@@ -17,7 +17,9 @@ import java.util.UUID;
 
 public class BleManager {
     private static final String TAG = "BleManager";
-    private static final String DEVICE_NAME = "HH-D101_Watch";
+    // 🔍 模糊匹配名字：只要包含这个词且不区分大小写
+    private static final String TARGET_NAME_KEY = "WATCH"; 
+    
     private static final UUID SERVICE_UUID = UUID.fromString("0000fe01-0000-1000-8000-00805f9b34fb");
     private static final UUID CHAR_UUID    = UUID.fromString("0000fe02-0000-1000-8000-00805f9b34fb");
 
@@ -39,9 +41,18 @@ public class BleManager {
             @Override
             public void onScanResult(int callbackType, ScanResult result) {
                 BluetoothDevice device = result.getDevice();
-                if (device != null && DEVICE_NAME.equals(device.getName())) {
-                    scanner.stopScan(this);
-                    mGatt = device.connectGatt(mContext, false, mGattCallback);
+                String name = device.getName();
+                
+                // 🔔 调试：如果我们搜到了任何有名字的设备，但在 SCANNING
+                if (name != null) {
+                    Log.d(TAG, "Found device: " + name);
+                    
+                    // 核心逻辑：名字里包含 "WATCH" (不分大小写) 就尝试连接
+                    if (name.toUpperCase().contains(TARGET_NAME_KEY)) {
+                        MainActivity.getInstance().updateStatus("FOUND: " + name, Color.BLUE);
+                        scanner.stopScan(this);
+                        mGatt = device.connectGatt(mContext, false, mGattCallback);
+                    }
                 }
             }
         });
@@ -52,12 +63,10 @@ public class BleManager {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 mConnected = true;
-                // ✅ 连上变绿
                 MainActivity.getInstance().updateStatus("STATUS: CONNECTED", Color.parseColor("#00AA00"));
                 gatt.discoverServices();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 mConnected = false;
-                // ❌ 断开变红
                 MainActivity.getInstance().updateStatus("STATUS: DISCONNECTED", Color.RED);
             }
         }

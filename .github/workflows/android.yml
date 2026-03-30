@@ -20,10 +20,10 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
       with:
-        gradle-version: 8.5  # 👈 锁定到稳定版本，解决版本冲突
+        gradle-version: 8.7  # 强制使用成熟版本
 
     - name: Build with Gradle
-      run: gradle assembleDebug
+      run: gradle :app:assembleDebug  # 精准定位模块编译
 
     - name: Upload APK
       uses: actions/upload-artifact@v4

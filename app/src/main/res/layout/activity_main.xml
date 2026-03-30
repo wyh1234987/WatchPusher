@@ -8,11 +8,20 @@
     android:background="#F0F0F0">
 
     <TextView
+        android:id="@+id/tv_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="STATUS: DISCONNECTED"
+        android:textColor="#FF0000"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="30dp"/>
+
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="WatchPusher Console"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:textSize="14sp"
         android:layout_marginBottom="40dp"/>
 
     <Button
@@ -29,13 +38,5 @@
         android:layout_height="wrap_content"
         android:text="2. CONNECT TO WATCH"
         android:padding="15dp"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Make sure Bluetooth is ON"
-        android:layout_marginTop="20dp"
-        android:textColor="#333333"
-        android:textSize="12sp"/>
 
 </LinearLayout>

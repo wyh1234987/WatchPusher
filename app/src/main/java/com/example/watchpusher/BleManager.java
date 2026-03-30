@@ -11,6 +11,8 @@ import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -32,7 +34,7 @@ public class BleManager {
     public void startScanAndConnect() {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter == null || !adapter.isEnabled()) {
-            Toast.makeText(mContext, "Please Turn ON Bluetooth", Toast.LENGTH_LONG).show();
+            showToast("Please Turn ON Bluetooth");
             return;
         }
 
@@ -57,11 +59,11 @@ public class BleManager {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 mConnected = true;
-                Log.i(TAG, "Connected to GATT server.");
+                showToast("Connected to Watch!"); // 🚀 这里会弹窗提示
                 gatt.discoverServices();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 mConnected = false;
-                Log.i(TAG, "Disconnected from GATT server.");
+                showToast("Disconnected!"); // 🚀 断开也会提示
             }
         }
 
@@ -77,10 +79,17 @@ public class BleManager {
         }
     };
 
+    private void showToast(final String msg) {
+        // BLE 回调在后台线程，必须切回到主线程才能弹窗
+        new Handler(Looper.getMainLooper()).post(() -> 
+            Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show()
+        );
+    }
+
     public void sendMessage(String msg) {
         if (!mConnected || mNotifyChar == null) return;
         mNotifyChar.setValue(msg.getBytes());
-        boolean success = mGatt.writeCharacteristic(mNotifyChar);
-        Log.d(TAG, "Sent: " + msg + " Success: " + success);
+        mGatt.writeCharacteristic(mNotifyChar);
+        Log.d(TAG, "Sent to watch: " + msg);
     }
 }

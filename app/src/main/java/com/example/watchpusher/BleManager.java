@@ -12,6 +12,7 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.UUID;
 
@@ -26,20 +27,23 @@ public class BleManager {
     private Context mContext;
     private boolean mConnected = false;
 
-    public BleManager(Context context) {
-        this.mContext = context;
-    }
+    public BleManager(Context context) { this.mContext = context; }
 
     public void startScanAndConnect() {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        if (adapter == null) return;
+        if (adapter == null || !adapter.isEnabled()) {
+            Toast.makeText(mContext, "Please Turn ON Bluetooth", Toast.LENGTH_LONG).show();
+            return;
+        }
 
         final BluetoothLeScanner scanner = adapter.getBluetoothLeScanner();
+        if (scanner == null) return;
+
         scanner.startScan(new ScanCallback() {
             @Override
             public void onScanResult(int callbackType, ScanResult result) {
                 BluetoothDevice device = result.getDevice();
-                if (DEVICE_NAME.equals(device.getName())) {
+                if (device != null && DEVICE_NAME.equals(device.getName())) {
                     Log.d(TAG, "Found Watch! Connecting...");
                     scanner.stopScan(this);
                     mGatt = device.connectGatt(mContext, false, mGattCallback);
@@ -76,7 +80,7 @@ public class BleManager {
     public void sendMessage(String msg) {
         if (!mConnected || mNotifyChar == null) return;
         mNotifyChar.setValue(msg.getBytes());
-        mGatt.writeCharacteristic(mNotifyChar);
-        Log.d(TAG, "Sent to watch: " + msg);
+        boolean success = mGatt.writeCharacteristic(mNotifyChar);
+        Log.d(TAG, "Sent: " + msg + " Success: " + success);
     }
 }
